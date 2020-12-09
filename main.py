@@ -24,12 +24,12 @@ def main():
     model = Model(sess)
 
     if args.train:
-        model.train(num_epoch=1)
+        model.train()
     if args.test:
         model.test()
     if args.explain:
         images, heatmaps = model.explain(method=args.method, num_visualize=args.visualize)
-        for i in range(5):
+        for i in range(args.visualize):
             fname = 'heatmap_{}'.format(i)
             utils.visualize_heatmap(fname, images[i], heatmaps[i])
 
