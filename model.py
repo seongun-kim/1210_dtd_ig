@@ -7,7 +7,7 @@ from methods.deep_taylor_decomposition import DTD
 from methods.integrated_gradients import IntegratedGradients
 
 class Model:
-    def __init__(self, sess, batch_size=512, lr=0.001, num_epoch=10, clip_norm=5.0):
+    def __init__(self, sess, batch_size=512):
         # Model parameters.
         self.sess = sess
         self.dim_input = [None, 28, 28, 1]
@@ -15,18 +15,12 @@ class Model:
 
         # Hyperparameters.
         self.batch_size = batch_size
-        self.lr = lr
-        self.num_epoch = num_epoch
-        self.clip_norm = clip_norm
 
         # Build neural network model.
         self._build_model()
 
         # Build summary for TensorBoard.
         self._build_summary()
-
-        # Load MNIST dataset.
-        self._build_dataset()
 
         # Initializer TF saver.
         self.saver = tf.train.Saver()
@@ -119,7 +113,15 @@ class Model:
         print('Checkpoint at {} is restored.\n'.format(ckpt_path))
 
 
-    def train(self):
+    def train(self, lr=0.001, num_epoch=10, clip_norm=5.0):
+        # Hyperparameters.
+        self.lr = lr
+        self.num_epoch = num_epoch
+        self.clip_norm = clip_norm
+
+        # Load MNIST dataset.
+        self._build_dataset()
+
         # Batch train and test dataset.
         self.ds_train = self.ds_train.batch(self.batch_size)
         self.ds_test = self.ds_test.batch(self.batch_size)
@@ -171,6 +173,9 @@ class Model:
 
 
     def test(self):
+        # Load MNIST dataset.
+        self._build_dataset()
+
         # Restore the latest model.
         self._restore('./checkpoint/')
 
@@ -194,6 +199,11 @@ class Model:
 
 
     def explain(self, method='dtd', num_visualize=50):
+        # Make sure there exists dataset.
+        if not hasattr(self, 'ds_test'):
+            self._build_dataset()
+
+        # Restore the latest model.
         self._restore('./checkpoint')
         batch_size = num_visualize
 
@@ -212,7 +222,7 @@ class Model:
         if method == 'dtd':
             dtd = DTD(self.sess, self.ds_test)
             images, heatmaps = dtd.run()
-        
+
         # Integrated Gradients
         elif method == 'integrated':
             steps = 100

@@ -12,9 +12,9 @@ class DTD:
         self.X = tf.get_collection('input')[0]
         self.pred = tf.get_collection('output')[0]        
         self.conv_w_1, self.conv_w_2, self.conv_w_3 = \
-            tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='conv_params/w')
+            tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='conv_params/w')[:3]
         self.fc_w_1, self.fc_w_2 = \
-            tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='fc_params/w')
+            tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='fc_params/w')[:2]
         self.activations = tf.get_collection(tf.GraphKeys.ACTIVATIONS)[0]
 
     
@@ -55,9 +55,6 @@ class DTD:
         z = z_o - z_p - z_n + 1e-10
         s = relevance / z
 
-        # c_o = tf.nn.conv2d_backprop_input(tf.shape(X), kernel, s, strides, padding)
-        # c_p = tf.nn.conv2d_backprop_input(tf.shape(X), W_p, s, strides, padding)
-        # c_n = tf.nn.conv2d_backprop_input(tf.shape(X), W_n, s, strides, padding)
         c_o = tf.nn.conv2d_transpose(s, kernel, tf.shape(X), strides, padding)
         c_p = tf.nn.conv2d_transpose(s, W_p, tf.shape(X), strides, padding)
         c_n = tf.nn.conv2d_transpose(s, W_n, tf.shape(X), strides, padding)

@@ -24,7 +24,7 @@ def main():
     model = Model(sess)
 
     if args.train:
-        model.train()
+        model.train(num_epoch=1)
     if args.test:
         model.test()
     if args.explain:
